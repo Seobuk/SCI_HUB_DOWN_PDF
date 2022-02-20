@@ -26,7 +26,7 @@ from bs4 import BeautifulSoup
 form_class = uic.loadUiType("./sci_hub.ui")[0]
 
 URL_scihub = 'https://sci-hub.se/'
-
+Count = 0
 
 
 
@@ -47,47 +47,84 @@ class Sci_Hub(QDialog, form_class):
         global html
         global soup
         global DownScript
+        global Count
+
 
         IEEE_export_csv = pd.read_csv(filename[0])
         DOI_CSV = IEEE_export_csv['DOI']
         Title_CSV = IEEE_export_csv['Document Title']
 
-        # 2. Target url
-        for i, DOI in enumerate(DOI_CSV):
+        URL_target = URL_scihub + DOI_CSV[Count]
 
-            URL_target = URL_scihub + DOI
+        self.textBrowser.append(Title_CSV[Count])
+        self.textBrowser.append(URL_target)
 
-            self.textBrowser.append(Title_CSV[i])
-            self.textBrowser.append(URL_target)
+        options = webdriver.ChromeOptions()
+        #options.add_argument('headless')
+        options.add_experimental_option("prefs", {
+            "download.default_directory": str(os.getcwd()) + "\Down_pdf",
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": True
+        })
+        driver = webdriver.Chrome(options=options)
 
-            options = webdriver.ChromeOptions()
-            #options.add_argument('headless')
-            options.add_experimental_option("prefs", {
-                "download.default_directory": str(os.getcwd()) + "\Down_pdf",
-                "download.prompt_for_download": False,
-                "download.directory_upgrade": True,
-                "safebrowsing.enabled": True
-            })
-            driver = webdriver.Chrome(options=options)
+        driver.implicitly_wait(10)
+        driver.get(URL_target)
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+        soup.getText()
+        DownScript = str(soup.button).rsplit(sep='"')[1]
+        driver.execute_script(DownScript)
 
-            driver.implicitly_wait(10)
-            driver.get(URL_target)
-            html = driver.page_source
-            soup = BeautifulSoup(html, 'html.parser')
-            soup.getText()
-            DownScript = str(soup.button).rsplit(sep='"')[1]
-            driver.execute_script(DownScript)
+        time.sleep(1)
+        path_dir = str(os.getcwd()) + "\Down_pdf"+"\*.crdownload"
+        glob.glob(path_dir)
+        global Wait_flag
+        Wait_flag = bool(glob.glob(path_dir))
 
-            time.sleep(1)
-            path_dir = str(os.getcwd()) + "\Down_pdf"+"\*.crdownload"
-            glob.glob(path_dir)
-            global Wait_flag
+        while Wait_flag :
             Wait_flag = bool(glob.glob(path_dir))
+            Count += 1
+            return 0
 
-            while Wait_flag :
-                Wait_flag = bool(glob.glob(path_dir))
-                return 0
-        return 0
+
+        # 2. Target url
+        # for i, DOI in enumerate(DOI_CSV):
+        #
+        #     URL_target = URL_scihub + DOI
+        #
+        #     self.textBrowser.append(Title_CSV[i])
+        #     self.textBrowser.append(URL_target)
+        #
+        #     options = webdriver.ChromeOptions()
+        #     #options.add_argument('headless')
+        #     options.add_experimental_option("prefs", {
+        #         "download.default_directory": str(os.getcwd()) + "\Down_pdf",
+        #         "download.prompt_for_download": False,
+        #         "download.directory_upgrade": True,
+        #         "safebrowsing.enabled": True
+        #     })
+        #     driver = webdriver.Chrome(options=options)
+        #
+        #     driver.implicitly_wait(10)
+        #     driver.get(URL_target)
+        #     html = driver.page_source
+        #     soup = BeautifulSoup(html, 'html.parser')
+        #     soup.getText()
+        #     DownScript = str(soup.button).rsplit(sep='"')[1]
+        #     driver.execute_script(DownScript)
+        #
+        #     time.sleep(1)
+        #     path_dir = str(os.getcwd()) + "\Down_pdf"+"\*.crdownload"
+        #     glob.glob(path_dir)
+        #     global Wait_flag
+        #     Wait_flag = bool(glob.glob(path_dir))
+        #
+        #     while Wait_flag :
+        #         Wait_flag = bool(glob.glob(path_dir))
+        #         return 0
+        # return 0
 
 
     def fileopen(self):
