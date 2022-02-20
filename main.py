@@ -6,6 +6,7 @@ import sys
 # from scihub import SciHub
 import os
 
+import requests
 import PyQt5.QtCore
 import pandas as pd
 import time
@@ -58,6 +59,7 @@ class Sci_Hub(QDialog, form_class):
 
         self.textBrowser.append(Title_CSV[Count])
         self.textBrowser.append(URL_target)
+        time.sleep(0)
 
         options = webdriver.ChromeOptions()
         #options.add_argument('headless')
@@ -73,20 +75,49 @@ class Sci_Hub(QDialog, form_class):
         driver.get(URL_target)
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-        soup.getText()
-        DownScript = str(soup.button).rsplit(sep='"')[1]
-        driver.execute_script(DownScript)
+        print(soup)
+        # soup.getText()
+        # print(soup)
+        #DownScript = str(soup.application).rsplit(sep='"')[1]
+        # DownScript = str(soup.src)
+        # print(DownScript)
 
-        time.sleep(1)
-        path_dir = str(os.getcwd()) + "\Down_pdf"+"\*.crdownload"
-        glob.glob(path_dir)
-        global Wait_flag
-        Wait_flag = bool(glob.glob(path_dir))
 
-        while Wait_flag :
-            Wait_flag = bool(glob.glob(path_dir))
-            Count += 1
-            return 0
+        # url = 'https://zero.sci-hub.se/1814/fcdf3dd24538987f6cef0a45f0b50388/godler2000.pdf'
+        # r = requests.get(url, stream=True)
+        #
+        # urllib.request.urlretrieve(url, "filename.pdf")
+        # with open('/tmp/godler2000.pdf', 'wb') as f:
+        #     f.write(r.content)
+        #
+        # options = webdriver.ChromeOptions()
+        # #options.add_argument('headless')
+        # options.add_experimental_option("prefs", {
+        #     "download.default_directory": str(os.getcwd()) + "\Down_pdf",
+        #     "download.prompt_for_download": False,
+        #     "download.directory_upgrade": True,
+        #     "safebrowsing.enabled": True
+        # })
+        # driver = webdriver.Chrome(options=options)
+        #
+        # driver.implicitly_wait(10)
+        # driver.get(URL_target)
+        # html = driver.page_source
+        # soup = BeautifulSoup(html, 'html.parser')
+        # soup.getText()
+        # DownScript = str(soup.button).rsplit(sep='"')[1]
+        # driver.execute_script(DownScript)
+        #
+        # time.sleep(1)
+        # path_dir = str(os.getcwd()) + "\Down_pdf"+"\*.crdownload"
+        # glob.glob(path_dir)
+        # global Wait_flag
+        # Wait_flag = bool(glob.glob(path_dir))
+        #
+        # while Wait_flag :
+        #     Wait_flag = bool(glob.glob(path_dir))
+        #     Count += 1
+        #     return 0
 
 
         # 2. Target url
